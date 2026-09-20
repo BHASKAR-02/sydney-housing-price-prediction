@@ -48,6 +48,7 @@ Full reasoning is in the notebook, Part 3.6.
 ├── backend/
 │   ├── main.py                       FastAPI service
 │   ├── features.py                   feature engineering, shared with the notebook
+│   ├── train.py                      canonical pipeline, used for the retrain fallback
 │   └── requirements.txt
 ├── frontend/
 │   └── app.py                        Streamlit application
@@ -97,8 +98,13 @@ pip install -r requirements-dev.txt
 ```
 
 `requirements.txt` is deliberately lean because Streamlit Community Cloud installs
-from it. The notebook dependencies (jupyter, matplotlib, seaborn) live in
-`requirements-dev.txt` so they do not slow down the deployment build.
+from it, and uses version ranges rather than exact pins so the installer can find
+wheels for whatever Python the host provides. Notebook dependencies live in
+`requirements-dev.txt`. To reproduce the report's exact numbers use
+`requirements-lock.txt` on Python 3.9 to 3.12.
+
+**Deploying to Streamlit Cloud:** set Python to 3.12 in *Advanced settings*. See
+`deploy/README.md` for why.
 
 ### 1. Build the dataset (optional, it is already committed)
 

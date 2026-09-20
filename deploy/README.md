@@ -25,16 +25,42 @@ The Render cold start is the reason the Streamlit app has a standalone fallback.
 it, a marker opening the link during a cold start would see an error rather than a slow
 load.
 
+## If the build hangs on "Processing dependencies"
+
+This one cost me time, so it is worth writing down. Streamlit Community Cloud picks
+its own Python version, and it is often a very recent one. If `requirements.txt`
+pins exact older versions, there is no matching wheel for that Python, so the
+installer falls back to compiling numpy and scikit-learn from source. On a free tier
+with 1 GB of RAM that either takes forever or runs out of memory, and the log just
+sits on `Processing dependencies` with no error.
+
+Two defences are in place:
+
+1. **The requirements use ranges, not exact pins**, so the installer can pick a
+   build that actually exists for whatever Python it has.
+2. **Set the Python version explicitly.** In the Streamlit Cloud app settings, open
+   *Advanced settings* and choose **Python 3.12**. This is the reliable fix. Reboot
+   the app afterwards.
+
+If you need the exact versions the report's numbers came from, use
+`requirements-lock.txt` on Python 3.9 to 3.12.
+
 ## Dependency files
 
-There are two, and which one gets installed matters for build time.
-
 - **`requirements.txt`** at the repo root is what Streamlit Community Cloud installs.
-  It is deliberately lean: the app and API only. Adding jupyter and matplotlib here
-  would roughly triple the build on a free tier for libraries the app never imports.
+  Lean and version-ranged: the app and API only.
+- **`requirements-lock.txt`** exact versions for reproducing the reported results.
 - **`requirements-dev.txt`** adds the notebook dependencies. Local use only.
-- **`backend/requirements.txt`** is what `render.yaml` installs for the API service,
-  which does not need streamlit either.
+- **`backend/requirements.txt`** is what `render.yaml` installs for the API service.
+
+## Why the model can survive a version mismatch
+
+`models/best_model.joblib` is a pickle, so it is tied to the scikit-learn version
+that wrote it. If the host installs a different version the unpickle can fail.
+`backend/main.py` catches that and rebuilds the Ridge pipeline from
+`data/sydney_housing_raw.csv` instead, which takes well under a second at 120 rows
+and produces identical predictions. `/health` reports which path was used via
+`model_source`.
 
 ## Files here
 

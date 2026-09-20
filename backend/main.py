@@ -55,17 +55,51 @@ MODEL = None
 META = {}
 
 
+MODEL_SOURCE = "not loaded"
+
+
 @app.on_event("startup")
 def load_model():
-    """Load once at startup rather than per request. Loading the pipeline takes
-    about a second and doing it on every call would make the API unusable."""
-    global MODEL, META
-    if not MODEL_PATH.exists():
-        log.error("model file missing at %s, run the notebook first", MODEL_PATH)
+    """Load once at startup rather than per request.
+
+    The saved pipeline is a pickle, so it is tied to the scikit-learn version that
+    created it. Hosting platforms do not always give you the version you pinned, and
+    a pickle that will not unpickle would take the whole service down. Ridge on 120
+    rows trains in under a second, so if the artefact is missing or refuses to load
+    we rebuild it from the CSV instead. Verified to produce identical predictions.
+    """
+    global MODEL, META, MODEL_SOURCE
+
+    if META_PATH.exists():
+        META = json.loads(META_PATH.read_text())
+    else:
+        log.warning("metadata missing at %s", META_PATH)
+
+    if MODEL_PATH.exists():
+        try:
+            MODEL = joblib.load(MODEL_PATH)
+            MODEL_SOURCE = "loaded from models/best_model.joblib"
+            log.info("loaded %s trained on %s rows",
+                     META.get("model_name"), META.get("trained_on_rows"))
+            return
+        except Exception as exc:
+            log.warning("could not unpickle %s (%s), retraining from CSV",
+                        MODEL_PATH, exc)
+    else:
+        log.warning("no model artefact at %s, retraining from CSV", MODEL_PATH)
+
+    csv = ROOT / "data" / "sydney_housing_raw.csv"
+    if not csv.exists():
+        log.error("no dataset at %s either, cannot serve predictions", csv)
         return
-    MODEL = joblib.load(MODEL_PATH)
-    META = json.loads(META_PATH.read_text())
-    log.info("loaded %s trained on %s rows", META.get("model_name"), META.get("trained_on_rows"))
+
+    try:
+        from backend.train import train_from_csv
+        MODEL = train_from_csv(csv)
+        MODEL_SOURCE = "retrained from data/sydney_housing_raw.csv at startup"
+        log.info("retrained Ridge pipeline from %s", csv)
+    except Exception as exc:
+        log.error("retraining failed: %s", exc)
 
 
 # ---------------------------------------------------------------------------
@@ -257,6 +291,7 @@ def health():
         "status": "healthy" if MODEL is not None else "degraded",
         "model_loaded": MODEL is not None,
         "model_name": META.get("model_name"),
+        "model_source": MODEL_SOURCE,
     }
 
 

@@ -1,20 +1,31 @@
 # Runtime dependencies for the deployed application.
 #
-# This is the file Streamlit Community Cloud installs from, so it is kept lean on
-# purpose. It has what the Streamlit app and the FastAPI backend need and nothing
-# else. Installing jupyter and matplotlib here would roughly triple the build time
-# on a free tier for libraries the running app never imports.
+# Two things to know about this file.
 #
-# To run the notebook as well:  pip install -r requirements-dev.txt
+# 1. It is deliberately lean. Streamlit Community Cloud installs from here, and
+#    adding jupyter and matplotlib would triple the build for libraries the
+#    running app never imports. Notebook deps are in requirements-dev.txt.
+#
+# 2. The versions are ranges, not exact pins, on purpose. Hosting platforms pick
+#    their own Python version, and an exact pin on an older release means there is
+#    no matching wheel, so the platform tries to compile numpy and scikit-learn
+#    from source and either hangs or runs out of memory on a free tier. Ranges let
+#    the installer pick a build that actually exists for whatever Python it has.
+#
+#    Version drift is safe here because backend/main.py rebuilds the model from
+#    the CSV if the saved pickle will not load under a different scikit-learn.
+#
+# For the exact versions the reported results were produced with, see
+# requirements-lock.txt.
 
-streamlit==1.50.0
-requests==2.32.3
+streamlit>=1.40,<2
+requests>=2.32,<3
 
-fastapi==0.128.8
-uvicorn[standard]==0.39.0
-pydantic==2.13.5
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+pydantic>=2.9,<3
 
-pandas==2.3.3
-numpy==2.0.2
-scikit-learn==1.6.1
-joblib==1.5.3
+pandas>=2.2,<3
+numpy>=1.26,<3
+scikit-learn>=1.5,<2
+joblib>=1.4,<2
