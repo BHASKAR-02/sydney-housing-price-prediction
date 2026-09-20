@@ -39,6 +39,7 @@ Full reasoning is in the notebook, Part 3.6.
 ```
 ├── data/
 │   ├── sydney_housing_raw.csv        120 sold properties, 23 columns
+│   ├── part5_estimates.csv           LLM and human estimates for the Part 5 comparison
 │   └── data_dictionary.md            every column, and the known problems with them
 ├── src/
 │   └── build_dataset.py              builds the dataset, see the honesty note below
@@ -49,8 +50,7 @@ Full reasoning is in the notebook, Part 3.6.
 │   ├── features.py                   feature engineering, shared with the notebook
 │   └── requirements.txt
 ├── frontend/
-│   ├── app.py                        Streamlit application
-│   └── requirements.txt
+│   └── app.py                        Streamlit application
 ├── models/
 │   ├── best_model.joblib             the fitted Ridge pipeline
 │   └── model_metadata.json           metrics, schema, per segment uncertainty
@@ -88,8 +88,17 @@ cd sydney-housing-price-prediction
 
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
+
+# to run the app and the API only
 pip install -r requirements.txt
+
+# to also run the notebook and regenerate the figures
+pip install -r requirements-dev.txt
 ```
+
+`requirements.txt` is deliberately lean because Streamlit Community Cloud installs
+from it. The notebook dependencies (jupyter, matplotlib, seaborn) live in
+`requirements-dev.txt` so they do not slow down the deployment build.
 
 ### 1. Build the dataset (optional, it is already committed)
 

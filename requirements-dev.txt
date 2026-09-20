@@ -1,0 +1,10 @@
+# Everything in requirements.txt, plus what is needed to run the notebook and
+# regenerate the figures. Use this locally, not on the deployment host.
+
+-r requirements.txt
+
+matplotlib==3.9.4
+seaborn==0.13.2
+jupyter==1.1.1
+notebook==7.3.2
+nbconvert==7.17.1

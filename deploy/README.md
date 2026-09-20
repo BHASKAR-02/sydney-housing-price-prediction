@@ -25,6 +25,17 @@ The Render cold start is the reason the Streamlit app has a standalone fallback.
 it, a marker opening the link during a cold start would see an error rather than a slow
 load.
 
+## Dependency files
+
+There are two, and which one gets installed matters for build time.
+
+- **`requirements.txt`** at the repo root is what Streamlit Community Cloud installs.
+  It is deliberately lean: the app and API only. Adding jupyter and matplotlib here
+  would roughly triple the build on a free tier for libraries the app never imports.
+- **`requirements-dev.txt`** adds the notebook dependencies. Local use only.
+- **`backend/requirements.txt`** is what `render.yaml` installs for the API service,
+  which does not need streamlit either.
+
 ## Files here
 
 - `render.yaml` blueprint for the Render backend
