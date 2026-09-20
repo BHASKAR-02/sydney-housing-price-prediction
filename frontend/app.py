@@ -69,14 +69,23 @@ st.markdown(f"""
 # ---------------------------------------------------------------------------
 @st.cache_resource(show_spinner=False)
 def load_local():
-    """Standalone mode. Imports the same prediction code the API uses so the two
-    modes cannot drift apart."""
-    import joblib
-    from backend.features import engineer  # noqa
+    """Standalone mode.
+
+    This delegates to the backend's own startup routine rather than loading the
+    pickle itself. That matters: the saved model is tied to the scikit-learn
+    version that wrote it, and a host running a newer version fails with
+    "module 'sklearn.compose._column_transformer' has no attribute
+    '_RemainderColsList'". api.load_model() catches that and rebuilds the pipeline
+    from the CSV, so routing through it means the standalone path gets the same
+    protection the API path has.
+    """
     from backend import main as api
 
-    api.MODEL = joblib.load(ROOT / "models" / "best_model.joblib")
-    api.META = json.loads((ROOT / "models" / "model_metadata.json").read_text())
+    api.load_model()
+    if api.MODEL is None:
+        raise RuntimeError(
+            "could not load models/best_model.joblib and could not rebuild the "
+            "model from data/sydney_housing_raw.csv either")
     return api
 
 
@@ -132,10 +141,23 @@ with st.sidebar:
             f"${META['metrics']['MAE']:,.0f} typical miss  \n"
             f"{META['metrics']['MAPE']:.1f}% of sale price  \n"
             f"R squared {META['metrics']['R2']:.3f}")
+
+        if MODE != "API":
+            src = getattr(load_local(), "MODEL_SOURCE", "")
+            if "retrained" in src:
+                st.caption(
+                    "The saved model file would not load under this version of "
+                    "scikit-learn, so it was rebuilt from the dataset at startup. "
+                    "Predictions are identical.")
         st.caption(f"Trained on {META['trained_on_rows']} sales across "
                    f"{len(META['suburbs'])} suburbs.")
     except Exception as e:
-        st.error(f"Could not load model metadata: {e}")
+        st.error(f"Could not start the model: {e}")
+        st.caption(
+            "If this mentions scikit-learn or a pickle, the deployed library "
+            "version differs from the one that trained the model. The app is "
+            "meant to rebuild it from data/sydney_housing_raw.csv automatically, "
+            "so check that file is present in the repository.")
         st.stop()
 
 st.title("Sydney Housing Price Estimator")
