@@ -163,8 +163,12 @@ def build_warnings(p: PropertyIn, predicted: float) -> List[str]:
             "Mosman and Parramatta. There were few of them in the training data and "
             "their pricing sits awkwardly between houses and apartments.")
 
-    if p.property_type == "House" and p.land_size_sqm <= 0:
-        out.append("Land size is zero for a house, which is unusual. Check the input.")
+    if p.property_type in ("House", "Townhouse") and p.land_size_sqm <= 0:
+        out.append(
+            f"Land size is zero for a {p.property_type.lower()}, which is almost "
+            "certainly a missing value rather than a real one. Land is a major price "
+            "driver for this property type, so the estimate below is likely to be far "
+            "too low. Supply a land size.")
 
     if p.internal_area_sqm > 0 and p.bedrooms / max(p.internal_area_sqm, 1) > 0.06:
         out.append(
