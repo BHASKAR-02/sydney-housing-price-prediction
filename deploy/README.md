@@ -53,6 +53,26 @@ If you need the exact versions the report's numbers came from, use
 - **`requirements-dev.txt`** adds the notebook dependencies. Local use only.
 - **`backend/requirements.txt`** is what `render.yaml` installs for the API service.
 
+## Before you redeploy, run the smoke test
+
+`scripts/smoke_test.py` exercises every code path the deployed app uses, in an
+environment that has only the runtime requirements. Both deployment bugs I hit
+would have been caught by it locally instead of on Streamlit Cloud.
+
+```bash
+python -m venv /tmp/leanenv
+/tmp/leanenv/bin/pip install -r requirements.txt
+/tmp/leanenv/bin/python scripts/smoke_test.py
+/tmp/leanenv/bin/python scripts/smoke_test.py --break-model   # simulates a version mismatch
+```
+
+The trap worth knowing: **do not use pandas Styler methods that depend on
+matplotlib** (`background_gradient`, `bar`, `text_gradient`) anywhere in the app.
+matplotlib is deliberately not a runtime dependency, and those methods fail at
+render time with `background_gradient requires matplotlib` rather than at import,
+so nothing catches them until a user opens that tab. `Styler.apply` with literal
+CSS strings is the safe equivalent.
+
 ## Why the model can survive a version mismatch
 
 `models/best_model.joblib` is a pickle, so it is tied to the scikit-learn version

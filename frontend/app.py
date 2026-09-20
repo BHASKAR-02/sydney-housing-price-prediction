@@ -415,11 +415,27 @@ because a tree cannot predict outside the range it was trained on, and Ridge can
     metrics.index.name = "model"
 
     st.markdown("##### Cross validated performance, errors in dollars")
+
+    def highlight_winner(row):
+        """Mark the best model. This is done with plain CSS on purpose.
+
+        pandas Styler.background_gradient() pulls its colormaps from matplotlib,
+        which is not in the deployment requirements because nothing else in the
+        app needs it. Calling it here raised "background_gradient requires
+        matplotlib" on Streamlit Cloud. Styler.apply() with literal CSS strings
+        has no such dependency, and highlighting the winning row says more than a
+        gradient did anyway.
+        """
+        best = row.name == metrics.index[0]          # already sorted by MAE
+        css = f"background-color: {BLUE}1A; font-weight: 600" if best else ""
+        return [css] * len(row)
+
     st.dataframe(
         metrics.style.format(
             {"MAE": "${:,.0f}", "RMSE": "${:,.0f}", "R2": "{:.3f}", "MAPE": "{:.1f}%"}
-        ).background_gradient(subset=["MAE"], cmap="Blues_r"),
+        ).apply(highlight_winner, axis=1),
         use_container_width=True)
+    st.caption(f"{metrics.index[0]} is the deployed model, highlighted above.")
     st.caption("MAE is the typical miss in dollars. MAPE is the same thing as a "
                "percentage, which is the fairer comparison across a dataset "
                r"spanning \$400k to \$7.9m.")

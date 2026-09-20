@@ -58,6 +58,8 @@ Full reasoning is in the notebook, Part 3.6.
 ├── outputs/
 │   ├── fig01 to fig13 .png           figures used in the report
 │   └── screenshots/                  application screenshots
+├── scripts/
+│   └── smoke_test.py                 checks every deployed path on runtime deps only
 ├── deploy/                           Render blueprint, Procfile, Dockerfile
 └── report/
     └── report.md                     the submitted report
