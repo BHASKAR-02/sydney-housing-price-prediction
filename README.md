@@ -83,7 +83,7 @@ else needs to change.
 Python 3.9 or newer.
 
 ```bash
-git clone https://github.com/<your-username>/sydney-housing-price-prediction.git
+git clone https://github.com/BHASKAR-02/sydney-housing-price-prediction.git
 cd sydney-housing-price-prediction
 
 python -m venv .venv
