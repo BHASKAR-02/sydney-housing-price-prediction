@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+.DS_Store
+.streamlit/secrets.toml
+*.log
+
+# The model file is committed on purpose. It is about 100 KB and the deployed app
+# needs it, and rebuilding it means running the whole notebook. If it ever gets
+# large, switch to Git LFS or build it in CI instead.

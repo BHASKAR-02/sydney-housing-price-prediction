@@ -1,0 +1,14 @@
+# The app CSS is built around a light surface, so I pin the theme rather than
+# letting it follow the viewer's system setting and half invert my own cards.
+[theme]
+base = "light"
+primaryColor = "#3B5BA5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F5F7"
+textColor = "#1F2933"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,9 @@
+# Backend only. Kept separate so the API service does not install jupyter,
+# matplotlib and seaborn, which would roughly triple the build on a free tier.
+fastapi==0.128.8
+uvicorn[standard]==0.39.0
+pydantic==2.13.5
+pandas==2.3.3
+numpy==2.0.2
+scikit-learn==1.6.1
+joblib==1.5.3

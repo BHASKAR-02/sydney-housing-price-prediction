@@ -1,0 +1,10 @@
+# Frontend for Streamlit Community Cloud. It includes the model libraries because
+# the app falls back to running the model in process when no API is reachable.
+streamlit==1.50.0
+requests==2.32.3
+pandas==2.3.3
+numpy==2.0.2
+scikit-learn==1.6.1
+joblib==1.5.3
+fastapi==0.128.8
+pydantic==2.13.5

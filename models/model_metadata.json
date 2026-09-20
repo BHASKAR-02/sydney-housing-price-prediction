@@ -1,0 +1,113 @@
+{
+  "model_name": "Ridge Regression",
+  "trained_on_rows": 120,
+  "target": "log(sale_price), predictions are exponentiated back to AUD",
+  "cv_metrics": {
+    "Ridge Regression": {
+      "MAE": 281821.99052994105,
+      "RMSE": 456404.13655651786,
+      "R2": 0.9201669643219162,
+      "MAPE": 15.915902257793842
+    },
+    "Random Forest": {
+      "MAE": 351996.21866363107,
+      "RMSE": 655144.1756457592,
+      "R2": 0.8355032701396883,
+      "MAPE": 18.882993140936833
+    },
+    "Gradient Boosting": {
+      "MAE": 352600.168693608,
+      "RMSE": 698258.4474773081,
+      "R2": 0.813140192612907,
+      "MAPE": 17.148559592120076
+    }
+  },
+  "best_metrics": {
+    "MAE": 281821.99052994105,
+    "RMSE": 456404.13655651786,
+    "R2": 0.9201669643219162,
+    "MAPE": 15.915902257793842
+  },
+  "suburbs": [
+    "Blacktown",
+    "Mosman",
+    "Parramatta"
+  ],
+  "property_types": [
+    "Apartment",
+    "House",
+    "Townhouse"
+  ],
+  "sale_methods": [
+    "Auction",
+    "Private Treaty"
+  ],
+  "numeric_features": [
+    "bedrooms",
+    "bathrooms",
+    "car_spaces",
+    "land_size_sqm",
+    "internal_area_sqm",
+    "distance_to_cbd_km",
+    "distance_to_station_km",
+    "school_catchment_rating",
+    "days_on_market",
+    "has_pool",
+    "has_aircon",
+    "renovated",
+    "water_view",
+    "property_age",
+    "total_rooms",
+    "bath_per_bed",
+    "land_to_internal",
+    "months_since_start",
+    "sale_month",
+    "station_convenience",
+    "amenity_score",
+    "description_length"
+  ],
+  "categorical_features": [
+    "suburb",
+    "property_type",
+    "sale_method"
+  ],
+  "text_feature": "agent_description",
+  "global_sigma_log": 0.19598257578885953,
+  "segment_sigma_log": {
+    "Blacktown|Apartment": 0.196,
+    "Blacktown|House": 0.1725,
+    "Blacktown|Townhouse": 0.2082,
+    "Mosman|Apartment": 0.176,
+    "Mosman|House": 0.1763,
+    "Mosman|Townhouse": 0.2085,
+    "Parramatta|Apartment": 0.198,
+    "Parramatta|House": 0.1417,
+    "Parramatta|Townhouse": 0.2331
+  },
+  "suburb_defaults": {
+    "Blacktown": {
+      "postcode": 2148,
+      "distance_to_cbd_km": 36.0,
+      "school_catchment_rating": 5.8,
+      "median_price": 970000.0
+    },
+    "Mosman": {
+      "postcode": 2088,
+      "distance_to_cbd_km": 6.5,
+      "school_catchment_rating": 9.2,
+      "median_price": 2897500.0
+    },
+    "Parramatta": {
+      "postcode": 2150,
+      "distance_to_cbd_km": 23.0,
+      "school_catchment_rating": 7.4,
+      "median_price": 980000.0
+    }
+  },
+  "training_price_range": {
+    "min": 405000.0,
+    "max": 7885000.0,
+    "p05": 489250.0,
+    "p95": 5585749.999999998
+  }
+}

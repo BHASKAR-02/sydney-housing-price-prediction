@@ -1,0 +1,22 @@
+# Render blueprint for the FastAPI backend.
+#
+# Render's free web service tier spins down after 15 minutes of no traffic and takes
+# roughly 50 seconds to wake up again. That is fine for a marker clicking a link, but
+# it is why the Streamlit app falls back to running the model in process instead of
+# just showing an error while it waits.
+#
+# To use: push this repo to GitHub, then on render.com pick New, Blueprint, and select
+# the repo. Render reads this file.
+
+services:
+  - type: web
+    name: sydney-housing-api
+    runtime: python
+    plan: free
+    region: singapore          # closest free region to Australia
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
