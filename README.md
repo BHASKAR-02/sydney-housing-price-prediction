@@ -7,6 +7,8 @@ learning lifecycle: data collection, exploration, feature engineering, model com
 error analysis, a comparison against an LLM and against my own estimates, and a deployed
 web application.
 
+**Live application:** https://sydney-housing-price-prediction.streamlit.app/
+
 ## What it does
 
 Give it a property in Mosman, Parramatta or Blacktown and it predicts a sale price, an

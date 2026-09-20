@@ -17,7 +17,7 @@ toc-depth: 2
 
 **GitHub:** https://github.com/BHASKAR-02/sydney-housing-price-prediction
 
-**Live application:** `https://<your-app>.streamlit.app`
+**Live application:** https://sydney-housing-price-prediction.streamlit.app/
 
 The repository holds the dataset, the notebook, the FastAPI backend, the Streamlit app and
 build instructions. `notebooks/sydney_housing_analysis.ipynb` runs top to bottom with no
@@ -353,6 +353,11 @@ from the residual spread of **that specific suburb and property type**, because 
 error varies far too much for one global band. And the Part 4 findings are returned as
 **warnings in the API response** rather than buried in this report.
 
+![The deployed application running on Streamlit Community Cloud at
+sydney-housing-price-prediction.streamlit.app. The sidebar notes that the saved model file
+would not load under the host's scikit-learn version, so it was rebuilt from the dataset at
+startup.](../outputs/screenshots_live/live_01_home.png)
+
 ![Entering a property and reading the estimate](../outputs/screenshots/02_prediction.png)
 
 ![The model flagging its own worst failure case](../outputs/screenshots/05_warning_case.png)
@@ -365,7 +370,45 @@ is its worst failure case and the number should be read as a ceiling.**
 
 The second tab scores a CSV; only five columns are required and the rest default. The third
 tab is a model card with the cross validation results, reliable price range, limitations and
-ethics. Build and deploy instructions are in the repository README.
+ethics.
+
+## How to build, run and use it
+
+**Reproduce the analysis.** Python 3.9 to 3.12.
+
+```bash
+git clone https://github.com/BHASKAR-02/sydney-housing-price-prediction.git
+cd sydney-housing-price-prediction
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt          # app plus notebook dependencies
+jupyter lab notebooks/sydney_housing_analysis.ipynb
+```
+
+Run all cells, about 30 seconds. This writes the figures to `outputs/` and the trained
+model to `models/`. `requirements-lock.txt` has the exact versions the numbers above came
+from; `python src/build_dataset.py` regenerates the dataset.
+
+**Run the application locally.**
+
+```bash
+pip install -r requirements.txt              # runtime only
+uvicorn backend.main:app --port 8000         # terminal 1, API and Swagger docs at /docs
+streamlit run frontend/app.py                # terminal 2, opens on :8501
+```
+
+The app finds the API automatically. If the API is not running it loads the model in
+process instead, so it works either way.
+
+**Use it.** Fill in the property form and press *Estimate price* for a prediction, an 80
+percent range and any risk flags. The *Upload a CSV* tab scores a spreadsheet and returns
+a downloadable file; download the template first for the column names. *About the model*
+is the model card.
+
+**Deploy it.** The live link above is Streamlit Community Cloud pointed at
+`frontend/app.py`, which needs no separate backend because of the in-process fallback.
+`deploy/render.yaml` deploys the API to Render if you want both services. Before
+redeploying, `scripts/smoke_test.py` checks every path against the runtime dependencies
+only, which is what caught two deployment bugs that the local environment hid.
 
 ## Reflection
 
@@ -382,6 +425,17 @@ came last. At 120 rows the binding constraint is information, not capacity, so a
 would go on collecting rows and columns, not on hyperparameters. **Feature engineering needs
 checking, not just doing**: two of my nine features did not work as intended, and I only
 found the TF-IDF suburb leak by inspecting importances.
+
+**Deployment broke in ways local testing could not see.** Three separate failures, none of
+which appear on a development machine: the host built a Python version with no wheels for my
+pinned libraries and silently tried to compile them from source; the saved model was a pickle
+tied to the scikit-learn version that wrote it and would not load under the host's newer one;
+and a pandas table style I used pulls its colormaps from matplotlib, which I had removed from
+the runtime dependencies, failing at render time rather than import time so nothing caught it
+early. The fix that mattered was not any individual patch but building
+`scripts/smoke_test.py`, which exercises every deployed path against the runtime
+dependencies only. The general lesson is that "it works on my machine" is a statement about
+one environment, and a deployment is a different one.
 
 **Performance versus deployability.** I got lucky, since the most accurate model was also the
 most interpretable. Had Gradient Boosting won narrowly I would still have shipped Ridge,
